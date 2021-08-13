@@ -5,6 +5,8 @@ require 'optparse'
 require 'uri'
 require 'cgi'
 require 'net/http'
+require 'date'
+require 'nokogiri'
 
 def fetch_body(url)
   res = Net::HTTP.get_response(URI.parse(url))
@@ -29,9 +31,26 @@ def save_html(url)
   end
 end
 
+def show_metadata(url)
+  body = fetch_body(url)
+  return unless body
+
+  doc = Nokogiri::HTML(body)
+  puts "Site: #{url.gsub(%r{^https?://}, '')}"
+  puts "num_links: #{doc.css('a').size}"
+  puts "images: #{doc.css('img').size}"
+  puts "last_fetch: #{DateTime.now}"
+end
+
 opt = OptionParser.new
+metadata = false
+opt.on('--metadata') {|v| metadata = true }
 urls = opt.parse(ARGV)
 
 urls.each do |url|
-  save_html(url)
+  if metadata
+    show_metadata(url)
+  else
+    save_html(url)
+  end
 end
