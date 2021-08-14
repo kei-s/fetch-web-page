@@ -1,10 +1,15 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
+    css_parser (1.10.0)
+      addressable
     nokogiri (1.12.3-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.12.3-x86_64-linux)
       racc (~> 1.4)
+    public_suffix (4.0.6)
     racc (1.5.2)
     webrick (1.7.0)
 
@@ -13,6 +18,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  css_parser
   nokogiri
   webrick
 

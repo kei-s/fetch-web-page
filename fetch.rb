@@ -8,6 +8,7 @@ require 'net/http'
 require 'date'
 require 'fileutils'
 require 'nokogiri'
+require 'css_parser'
 
 def fetch_body(url)
   res = Net::HTTP.get_response(URI.parse(url))
@@ -73,6 +74,8 @@ def save_all_assets(url)
   end
 
   doc = Nokogiri::HTML(body)
+
+  puts 'Fetching: img and script'
   doc.css('img', 'script').each do |tag|
     src = tag.attr('src')
     next unless src
@@ -80,6 +83,8 @@ def save_all_assets(url)
     uri = URI.parse(src)
     save_assets(dir_name, url, uri) unless uri.absolute?
   end
+
+  puts 'Fetching: picture'
   doc.css('picture source').each do |tag|
     srcset = tag.attr('srcset')
     srcset.split(',').each do |str|
@@ -88,12 +93,32 @@ def save_all_assets(url)
       save_assets(dir_name, url, uri) unless uri.absolute?
     end
   end
+
+  puts 'Fetching: link (stylesheet)'
   doc.css('link').each do |tag|
     href = tag.attr('href')
     next unless href
 
     uri = URI.parse(href)
     save_assets(dir_name, url, uri) unless uri.absolute?
+  end
+
+  puts 'Fetching: font-face'
+  doc.css('style').each do |tag|
+    parser = CssParser::Parser.new
+    parser.load_string! tag.text
+    parser.find_rule_sets(['@font-face']).each do |font_face|
+      font_face.each_declaration do |property, value, _is_important|
+        next unless property == 'src'
+
+        value.split(',') do |font|
+          if (matched = font.match(/url\(([^)]+)\)/))
+            uri = URI.parse(matched[1])
+            save_assets(dir_name, url, uri) unless uri.absolute?
+          end
+        end
+      end
+    end
   end
 end
 
