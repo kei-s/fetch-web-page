@@ -4,5 +4,6 @@ WORKDIR /fetch
 COPY Gemfile* ./
 RUN bundle install
 COPY fetch.rb ./fetch
-RUN chmod +x fetch
+COPY serve.rb ./serve
+RUN chmod +x fetch serve
 ENTRYPOINT [ "bash" ]
