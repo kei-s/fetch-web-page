@@ -76,6 +76,7 @@ def save_all_assets(url)
   doc.css('img', 'script').each do |tag|
     src = tag.attr('src')
     next unless src
+
     uri = URI.parse(src)
     save_assets(dir_name, url, uri) unless uri.absolute?
   end
@@ -90,6 +91,7 @@ def save_all_assets(url)
   doc.css('link').each do |tag|
     href = tag.attr('href')
     next unless href
+
     uri = URI.parse(href)
     save_assets(dir_name, url, uri) unless uri.absolute?
   end
@@ -98,8 +100,8 @@ end
 opt = OptionParser.new
 metadata = false
 all_assets = false
-opt.on('--metadata') {|_v| metadata = true }
-opt.on('--all-assets') {|_v| all_assets = true }
+opt.on('--metadata') { |_v| metadata = true }
+opt.on('--all-assets') { |_v| all_assets = true }
 urls = opt.parse(ARGV)
 
 urls.each do |url|
